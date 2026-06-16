@@ -1,0 +1,9 @@
+spring:
+  data:
+    mongodb:
+      uri: mongodb+srv://akashnaik00:AKASHNAIK123@cluster0.rndhgmp.mongodb.net/Journaldb?retryWrites=true&w=majority
+      database: Journaldb
+      auto-index-creation: true
+
+server:
+  port: 8080

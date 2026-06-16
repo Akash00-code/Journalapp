@@ -1,0 +1,21 @@
+spring:
+  data:
+    mongodb:
+      uri: mongodb+srv://akashnaik00:AKASHNAIK123@cluster0.rndhgmp.mongodb.net/Journaldb?retryWrites=true&w=majority
+      database: Journaldb
+      auto-index-creation: true
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: iamakashnaik143@gmail.com
+    password: trlb qbio gwtm sctx
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+
+server:
+  port: 9090
