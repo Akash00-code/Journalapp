@@ -1,0 +1,6 @@
+19:38:54 [main] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils ---> Could not detect default configuration classes for test class [net.engineeringdigest.journalapp.Service.UserRepositoryImplTest]: UserRepositoryImplTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+19:38:55 [main] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper ---> Found @SpringBootConfiguration net.engineeringdigest.journalapp.JournalApplication for test class net.engineeringdigest.journalapp.Service.UserRepositoryImplTest
+19:38:56 [main] INFO  n.e.j.Service.UserRepositoryImplTest ---> Starting UserRepositoryImplTest using Java 21.0.8 with PID 10228 (started by Lenovo in D:\spring\journalapp)
+19:38:56 [main] INFO  n.e.j.Service.UserRepositoryImplTest ---> The following 1 profile is active: "prod"
+19:38:58 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate ---> Bootstrapping Spring Data MongoDB repositories in DEFAULT mode.
+19:38:59 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate ---> Finished Spring Data repository scanning in 608 ms. Found 4 MongoDB repository interfaces.
