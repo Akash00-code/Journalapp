@@ -11,7 +11,6 @@ public class EmailServiceTest {
     private EmailService emailService;
     @Test
     public void testEmailService() {
-        emailService.sendEmail("revanthofficial156@gmail.com","Hello revanth",
-                "your account credited Rs.1000000 please withdraw");
+        assertEquals("success",emailService.sendTextEmail());
     }
 }
