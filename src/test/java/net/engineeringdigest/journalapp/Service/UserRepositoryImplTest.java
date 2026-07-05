@@ -16,6 +16,6 @@ public class UserRepositoryImplTest {
 
     @Test
     public void testRepo() {
-        assertNotNull(userRepositoryImpl.getUsers());
+        assertNotNull(userRepositoryImpl.getUsersForSA());
     }
 }

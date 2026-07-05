@@ -52,8 +52,18 @@ public class EmailService {
             log.error("Error in sending email",e);
             return "error";
         }
-
     }
-
+    public String sendSentimentEmail(String to,String subject,String text){
+        try{
+            SimpleMailMessage msg=new  SimpleMailMessage();
+            msg.setTo(to);
+            msg.setSubject(subject);
+            msg.setText(text);
+            return "success";
+        }catch(Exception e){
+            log.error("Error in sending email",e);
+            return "error";
+        }
+    }
 
 }

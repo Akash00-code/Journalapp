@@ -4,11 +4,10 @@ spring:
 
 logging:
   level:
-    net:
-      engineeringdigest:
-        journalapp:
-          Service:
-            UserService: OFF
+    org:
+      springframework:
+        security: OFF
+
 
 weather_api_key: e06cee9ddb761aa49b8bfd235f6c2338
 quotes_api_key: wAidLsDeAxoMWr2zUqWDmILUSktAU4ClLN8CR0IZ
