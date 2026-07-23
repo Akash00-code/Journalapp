@@ -1,6 +1,7 @@
 package net.engineeringdigest.journalapp.controller;
 
 import net.engineeringdigest.journalapp.Service.EmailService;
+import net.engineeringdigest.journalapp.schedular.UserShcheduler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,6 +13,8 @@ public class EmailController {
 
     @Autowired
     EmailService emailService;
+    @Autowired
+    UserShcheduler  userShcheduler;
     @GetMapping("/send-text")
     public String sendText(){
         return emailService.sendTextEmail();
@@ -20,4 +23,10 @@ public class EmailController {
     public String sendAttachment(){
         return emailService.sendAttachmentEmail();
     }
+    @GetMapping("/send-sentiment-email")
+    public String sendSentimentEmail(){
+        userShcheduler.fetchUsersAndSendSAMail();
+        return " ";
+    }
+
 }

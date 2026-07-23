@@ -59,6 +59,7 @@ public class EmailService {
             msg.setTo(to);
             msg.setSubject(subject);
             msg.setText(text);
+            mailSender.send(msg);
             return "success";
         }catch(Exception e){
             log.error("Error in sending email",e);
