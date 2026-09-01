@@ -13,6 +13,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.web.bind.annotation.*;
 
 import net.engineeringdigest.journalapp.Entity.User;
@@ -32,6 +33,8 @@ public class UserEntryController {
     @GetMapping("/my-profile")
     public User userInfo(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        WebAuthenticationDetails details = (WebAuthenticationDetails) authentication.getDetails();
+        System.out.println(STR."Clients remote address: \{details.getRemoteAddress()}\n session_id: \{details.getSessionId()}");
         return userService.findByUserName(authentication.getName());
     }
 
