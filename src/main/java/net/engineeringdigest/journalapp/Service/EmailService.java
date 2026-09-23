@@ -66,5 +66,18 @@ public class EmailService {
             return "error";
         }
     }
+    public String sendOtpEmail(String to,String subject,String text){
+        try{
+            SimpleMailMessage msg=new  SimpleMailMessage();
+            msg.setTo(to);
+            msg.setSubject(subject);
+            msg.setText(text);
+            mailSender.send(msg);
+            return "success";
+        }catch(Exception e){
+            log.error("Error in sending OTP",e);
+            return "error";
+        }
+    }
 
 }

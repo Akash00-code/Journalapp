@@ -35,7 +35,7 @@ public class JwtService {
                 .header().empty().add("typ","jwt").and()
                 .subject(userName)
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60))
+                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 10))
                 .issuer("admin of app")
                 .signWith(getSigningKey())
                 .compact();

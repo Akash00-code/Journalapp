@@ -3,6 +3,7 @@ package net.engineeringdigest.journalapp.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import net.engineeringdigest.journalapp.Entity.User;
+import net.engineeringdigest.journalapp.Service.EmailService;
 import net.engineeringdigest.journalapp.Service.JwtService;
 import net.engineeringdigest.journalapp.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,9 +17,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.security.SecureRandom;
+import java.time.Instant;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @RestController
 @RequestMapping("/public")
@@ -26,15 +28,18 @@ import java.util.List;
 public class PublicController {
     private  final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+    private final EmailService emailService;
+    public static final ConcurrentHashMap<String, Instant> otpMap=new ConcurrentHashMap<>();
 
-    public PublicController(AuthenticationManager authenticationManager, JwtService jwtService) {
+    public PublicController(AuthenticationManager authenticationManager, JwtService jwtService,EmailService emailService) {
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
+        this.emailService = emailService;
     }
 
     @GetMapping("/health-check")
-    public String Health(@RequestParam String username) {
-        return STR."Your health is good \{username} keep doing exercise regularly!";
+    public String Health() {
+        return STR."App is healthy";
     }
     @GetMapping("/csrf")
     public CsrfToken getToken(HttpServletRequest request){
@@ -56,12 +61,21 @@ public class PublicController {
     @PutMapping("/forgot-password")
     public ResponseEntity<?> ForgotPassword(@RequestBody User Newuser) {
         User user=userService.findByUserName(Newuser.getUserName());
-        if(user==null){
+        if(user==null||user.getEmail().isBlank()||!(user.getEmail().equals(Newuser.getEmail()))){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        user.setPassword(encoder.encode(Newuser.getPassword()));
-        userService.SaveUser(user);
-        return new ResponseEntity<>("password changed",HttpStatus.OK);
+        SecureRandom random = new SecureRandom();
+        int otp=100000+random.nextInt(999999);
+        String OTP=String.valueOf(otp);
+
+        String response = emailService.sendOtpEmail(user.getEmail(),
+                "OTP for changing password",
+                STR."OTP to change your account password is \{OTP}");
+        otpMap.put(OTP,Instant.now().plusSeconds(90));
+        if(response.equals("success")){
+            return new ResponseEntity<>("OTP is sent to your registered email",HttpStatus.OK);
+        }
+        return new ResponseEntity<>("Something went wrong Please try again later",HttpStatus.SERVICE_UNAVAILABLE);
     }
     @PostMapping("/Login")
     public ResponseEntity<String> loginUser(@RequestBody User user) {
@@ -77,6 +91,21 @@ public class PublicController {
             );
         }
 
+    }
+    @GetMapping("/validateOtp")
+    public String validateOtp(@RequestParam String Otp,@RequestBody User user){
+        if(!otpMap.containsKey(Otp)||otpMap.get(Otp)==null){
+            return "Please generate your OTP";
+        }
+        if(otpMap.get(Otp).isBefore(Instant.now())){
+            otpMap.remove(Otp);
+            return "OTP is expired";
+        }
+        otpMap.remove(Otp);
+        User nuser = userService.findByUserName(user.getUserName());
+        nuser.setPassword(encoder.encode(user.getPassword()));
+        userService.SaveUser(nuser);
+        return "password changed successfully";
     }
 
 }
