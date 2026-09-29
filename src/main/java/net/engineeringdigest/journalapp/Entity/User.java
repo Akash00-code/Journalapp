@@ -33,6 +33,7 @@ public class User {
     @NonNull
     private String password;
     @DBRef
+    @Builder.Default
     private List<JournalEntry> Journalentries = new ArrayList<>();
     private List<String> roles;
 

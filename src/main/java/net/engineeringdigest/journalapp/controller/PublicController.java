@@ -1,11 +1,15 @@
 package net.engineeringdigest.journalapp.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import net.engineeringdigest.journalapp.DTO.UserDto;
+import net.engineeringdigest.journalapp.DTO.UserLogin;
 import net.engineeringdigest.journalapp.Entity.User;
 import net.engineeringdigest.journalapp.Service.EmailService;
 import net.engineeringdigest.journalapp.Service.JwtService;
 import net.engineeringdigest.journalapp.Service.UserService;
+import net.engineeringdigest.journalapp.schedular.UserShcheduler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,16 +29,19 @@ import java.util.concurrent.ConcurrentHashMap;
 @RestController
 @RequestMapping("/public")
 @Slf4j
+@Tag(name = "Public APIs",description="public controller")
 public class PublicController {
     private  final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final EmailService emailService;
+    private final UserShcheduler userShcheduler;
     public static final ConcurrentHashMap<String, Instant> otpMap=new ConcurrentHashMap<>();
 
-    public PublicController(AuthenticationManager authenticationManager, JwtService jwtService,EmailService emailService) {
+    public PublicController(AuthenticationManager authenticationManager, JwtService jwtService,EmailService emailService, UserShcheduler userShcheduler) {
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
         this.emailService = emailService;
+        this.userShcheduler = userShcheduler;
     }
 
     @GetMapping("/health-check")
@@ -50,11 +57,15 @@ public class PublicController {
     @Autowired
     PasswordEncoder encoder;
     @PostMapping("/SignUp")
-    public ResponseEntity<?> CreateUser(@RequestBody User user) {
-        user.setPassword(encoder.encode(user.getPassword()));
+    public ResponseEntity<String> CreateUser(@RequestBody UserDto userDto) {
+        User user=new User();
+        user.setUserName(userDto.getUserName());
+        user.setPassword(encoder.encode(userDto.getPassword()));
+        user.setEmail(userDto.getEmail());
+        user.setSentimentAnalysis(userDto.getSentimentAnalysis());
         user.setRoles(List.of("USER"));
         userService.SaveUser(user);
-        return new  ResponseEntity<>(HttpStatus.CREATED);
+        return new  ResponseEntity<>("Account created",HttpStatus.CREATED);
     }
 
 
@@ -78,7 +89,7 @@ public class PublicController {
         return new ResponseEntity<>("Something went wrong Please try again later",HttpStatus.SERVICE_UNAVAILABLE);
     }
     @PostMapping("/Login")
-    public ResponseEntity<String> loginUser(@RequestBody User user) {
+    public ResponseEntity<String> loginUser(@RequestBody UserLogin user) {
         try{
             Authentication authenticate = authenticationManager
                     .authenticate(new UsernamePasswordAuthenticationToken(user.getUserName(), user.getPassword()));
@@ -93,19 +104,26 @@ public class PublicController {
 
     }
     @GetMapping("/validateOtp")
-    public String validateOtp(@RequestParam String Otp,@RequestBody User user){
+    public ResponseEntity<String> validateOtp(@RequestParam String Otp,@RequestBody User user){
         if(!otpMap.containsKey(Otp)||otpMap.get(Otp)==null){
-            return "Please generate your OTP";
+            return new ResponseEntity<>("Invalid OTP",HttpStatus.BAD_REQUEST);
         }
         if(otpMap.get(Otp).isBefore(Instant.now())){
             otpMap.remove(Otp);
-            return "OTP is expired";
+            return new ResponseEntity<>("OTP is expired",HttpStatus.GONE);
         }
         otpMap.remove(Otp);
         User nuser = userService.findByUserName(user.getUserName());
         nuser.setPassword(encoder.encode(user.getPassword()));
         userService.SaveUser(nuser);
-        return "password changed successfully";
+        return ResponseEntity.ok("Password changed successfully");
     }
+
+    @PostMapping("/send-sentiment-email")
+    public ResponseEntity<String> sendSentimentEmail(){
+        userShcheduler.fetchUsersAndSendSAMail();
+        return ResponseEntity.ok("Email is sent");
+    }
+
 
 }

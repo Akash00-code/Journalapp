@@ -2,6 +2,8 @@ package net.engineeringdigest.journalapp.controller;
 
 import java.util.*;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import net.engineeringdigest.journalapp.Entity.User;
 import net.engineeringdigest.journalapp.Service.UserService;
 import org.bson.types.ObjectId;
@@ -22,8 +24,11 @@ import org.springframework.web.bind.annotation.RestController;
 import net.engineeringdigest.journalapp.Entity.JournalEntry;
 import net.engineeringdigest.journalapp.Service.JournalServices;
 
+import javax.swing.text.html.HTML;
+
 @RestController
 @RequestMapping("/Journal")
+@Tag(name = "Journal APIs",description = "Journal controller")
 public class JournalEntryController_2 {
 
     @Autowired
@@ -32,6 +37,7 @@ public class JournalEntryController_2 {
     private UserService  userService;
 
     @PostMapping
+    @Operation(summary = "create an journal entry for user")
     public ResponseEntity<?> CreateEntry(@RequestBody JournalEntry e) {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -44,6 +50,7 @@ public class JournalEntryController_2 {
     }
 
     @GetMapping
+    @Operation(summary = "get all journal entries of a user")
     public ResponseEntity<?> getEntriesList() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = userService.findByUserName(authentication.getName());
@@ -55,7 +62,9 @@ public class JournalEntryController_2 {
     }
 
     @GetMapping("/id/{id}")
-    public ResponseEntity<?> getEntryById(@PathVariable ObjectId id) {
+    @Operation(summary = "get journal entry by id")
+    public ResponseEntity<?> getEntryById(@PathVariable String jid) {
+        ObjectId id =new ObjectId(jid);
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = userService.findByUserName(authentication.getName());
         JournalEntry journalEntry = user.getJournalentries().stream().filter(x -> x.getId().equals(id)).findFirst().orElse(null);
@@ -67,7 +76,9 @@ public class JournalEntryController_2 {
 
 
     @DeleteMapping("/id/{id}")
-    public ResponseEntity<?> DeleteEntry(@PathVariable ObjectId id) {
+    @Operation(summary = "delete entry by id")
+    public ResponseEntity<?> DeleteEntry(@PathVariable String jid) {
+        ObjectId id=new ObjectId(jid);
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = userService.findByUserName(authentication.getName());
         boolean b = user.getJournalentries().removeIf(x -> x.getId().equals(id));
@@ -95,6 +106,7 @@ public class JournalEntryController_2 {
 
     }
     @DeleteMapping
+    @Operation(summary = "delete all entries")
     public ResponseEntity<?> deletemanyEntry(){
         mongoService.deletemany();
         return new ResponseEntity<>(HttpStatus.GONE);
