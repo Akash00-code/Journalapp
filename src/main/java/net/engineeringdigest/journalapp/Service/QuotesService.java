@@ -16,7 +16,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.util.List;
 
 @Service
-public class QuotesService {
+public class  QuotesService {
    // private final AppCache cache;
     private final WebClient webClient;
     public QuotesService(AppCache cache, WebClient.Builder webClientBuilder, @Value("${quotes_api_key}") String apiKey) {

@@ -17,7 +17,9 @@ public class WeatherService {
     String apiKey;
     //private final AppCache cache;
     private final WebClient webClient;
-    public WeatherService(AppCache cache, WebClient.Builder webClientBuilder) {
+    private final RedisService redisService;
+    public WeatherService(AppCache cache, WebClient.Builder webClientBuilder, RedisService redisService) {
+        this.redisService = redisService;
         //this.cache = cache;
         this.webClient = webClientBuilder.baseUrl(cache.appCache.get(AppCache.apis.WEATHER_API.toString())).build();
     }
@@ -31,15 +33,22 @@ public class WeatherService {
     public WeatherResponse getCurrentWeather(String city){
 //        String Url = url.replace("YOUR_ACCESS_KEY", apiKey).replace("CITY", city);
 //        return restTemplate.exchange(Url, HttpMethod.GET, null, WeatherResponse.class).getBody();
-
-        return webClient.get()
-                .uri(uribuilder->uribuilder
+        WeatherResponse o = redisService.get(city, WeatherResponse.class);
+        if(o!=null){
+            return o;
+        }
+        WeatherResponse response = webClient.get()
+                .uri(uribuilder -> uribuilder
                         .path("/current")
-                        .queryParam("access_key",apiKey)
-                        .queryParam("query",city)
+                        .queryParam("access_key", apiKey)
+                        .queryParam("query", city)
                         .build())
                 .retrieve()
                 .bodyToMono(WeatherResponse.class)
                 .block();
+        if(response!=null){
+            redisService.set(city,response,300L);
+        }
+        return response;
     }
 }
