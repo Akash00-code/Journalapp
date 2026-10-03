@@ -1,4 +1,7 @@
 spring:
+  redis:
+    host: localhost
+    port: 6379
   data:
     redis:
       url: redis://default:4Kk4l9wv9ssIhKrzWplV64mPDNYaH8u6@tigerlily-paper-haircut-85533.db.redis.io:12403
