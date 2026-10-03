@@ -5,7 +5,10 @@ import net.engineeringdigest.journalapp.Entity.User;
 import net.engineeringdigest.journalapp.JournalMongodbRepo.UserRepositoryImpl;
 import net.engineeringdigest.journalapp.Service.EmailService;
 import net.engineeringdigest.journalapp.enums.Sentiment;
+import net.engineeringdigest.journalapp.model.SentimentData;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -22,7 +25,9 @@ public class UserShcheduler {
     private UserRepositoryImpl userRepository;
     @Autowired
     EmailService emailService;
-
+    @Autowired
+    private KafkaTemplate<String, SentimentData> kafkaTemplate;
+    //@Scheduled(cron = "0 0 9 * * SUN")
     public void fetchUsersAndSendSAMail(){
         List<User> users = userRepository.getUsersForSA();
         for(User user : users){
@@ -40,9 +45,15 @@ public class UserShcheduler {
             Optional<Map.Entry<Sentiment, Integer>> entry = sentimentCounts.entrySet().stream()
                     .min((a, b) -> b.getValue() - a.getValue());
 
-            entry.ifPresent(sentimentIntegerEntry ->
-                    emailService.sendSentimentEmail(user.getEmail(), "sentiment for last 7 days", sentimentIntegerEntry.getKey().toString()));
+            if(entry.isPresent()){
+                SentimentData data=SentimentData.builder().email(user.getEmail()).sentiment(entry.get().getKey().toString()).build();
+                try{
+                    kafkaTemplate.send("weekly-sentiment-data", user.getEmail(), data);
+                }catch(Exception e){
+                    emailService.sendSentimentEmail(data.getEmail(),"sentiment for last 7 days",data.getSentiment());
+                }
 
+            }
         }
 
 

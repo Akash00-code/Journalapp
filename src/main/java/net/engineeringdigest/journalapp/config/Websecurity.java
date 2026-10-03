@@ -40,7 +40,7 @@ public class Websecurity {
         http.authorizeHttpRequests(
                 request->request
                         .requestMatchers("/Journal/**","/user/**").authenticated()
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/admin/**","/public/send-sentiment-email").hasRole("ADMIN")
                         .anyRequest().permitAll())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .formLogin(Customizer.withDefaults())

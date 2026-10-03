@@ -2,6 +2,7 @@ package net.engineeringdigest.journalapp.controller;
 
 
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import net.engineeringdigest.journalapp.Entity.Quotes;
 import net.engineeringdigest.journalapp.Entity.WeatherResponse;
 import net.engineeringdigest.journalapp.Service.QuotesService;
@@ -21,6 +22,7 @@ import net.engineeringdigest.journalapp.Service.UserService;
 
 @RestController
 @RequestMapping("/user")
+@Tag(name="User APIs",description = "user controller")
 public class UserEntryController {
 
     @Autowired

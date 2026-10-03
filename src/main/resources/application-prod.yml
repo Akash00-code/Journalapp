@@ -1,4 +1,7 @@
 spring:
+  redis:
+    host: localhost
+    port: 6379
   data:
     mongodb:
       uri: mongodb+srv://akashnaik00:AKASHNAIK123@cluster0.rndhgmp.mongodb.net/Journaldb?retryWrites=true&w=majority
@@ -15,6 +18,22 @@ spring:
           auth: true
           starttls:
             enable: true
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      retries: 0
+      properties:
+        max.block.ms: 1000
+    consumer:
+      group-id: weekly-sentiment-grp
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      auto-offset-reset: earliest
+      properties:
+        spring.json.trusted.packages: "net.engineeringdigest.journalapp.*"
+        spring.json.value.default.type: net.engineeringdigest.journalapp.model.SentimentData
 
 
 server:
