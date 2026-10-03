@@ -55,7 +55,7 @@ public class UserShcheduler {
                                 if (ex != null){
                                     log.error("Error occurred while publishing the event.");
                             }else{
-                                    log.info("Successfully published the event.{}",res.toString());
+                                    log.info("Successfully published the event.{}",res);
                                 }
                             });
                 }catch(Exception e){
