@@ -1,5 +1,6 @@
 package net.engineeringdigest.journalapp.schedular;
 
+import lombok.extern.slf4j.Slf4j;
 import net.engineeringdigest.journalapp.Entity.JournalEntry;
 import net.engineeringdigest.journalapp.Entity.User;
 import net.engineeringdigest.journalapp.JournalMongodbRepo.UserRepositoryImpl;
@@ -20,6 +21,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @Component
+@Slf4j
 public class UserShcheduler {
     @Autowired
     private UserRepositoryImpl userRepository;
@@ -48,7 +50,14 @@ public class UserShcheduler {
             if(entry.isPresent()){
                 SentimentData data=SentimentData.builder().email(user.getEmail()).sentiment(entry.get().getKey().toString()).build();
                 try{
-                    kafkaTemplate.send("weekly-sentiment-data", user.getEmail(), data);
+                    kafkaTemplate.send("weekly-sentiment-data", user.getEmail(), data).whenComplete(
+                            (res,ex) -> {
+                                if (ex != null){
+                                    log.error("Error occurred while publishing the event.");
+                            }else{
+                                    log.info("Successfully published the event.{}",res.toString());
+                                }
+                            });
                 }catch(Exception e){
                     emailService.sendSentimentEmail(data.getEmail(),"sentiment for last 7 days",data.getSentiment());
                 }
